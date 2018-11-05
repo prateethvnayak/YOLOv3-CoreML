@@ -1,4 +1,7 @@
-# YOLOv3 with Core ML
+# ------UNDER CONSTRUCTION------
+
+
+# YOLOv3 with Core ML (for Static Image Application)
 
 This repo was forked and modified from  https://github.com/Ma-Dan/YOLOv3-CoreML
 The changes made:
