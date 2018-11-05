@@ -1,3 +1,12 @@
+# ----- UNDER CONSTRUCTION -----
+
+This branch has the implementation for Tiny-YOLOv3. Forked from https://github.com/Ma-Dan/YOLOv3-CoreML. 
+The changes made are :
+
+- Application for Static Images (instead of real-time video)
+
+--- README forked---
+
 # YOLOv3 with Core ML
 
 This repo was forked and modified from [hollance/YOLO-CoreML-MPSNNGraph](https://github.com/hollance/YOLO-CoreML-MPSNNGraph). Some changes I made:
