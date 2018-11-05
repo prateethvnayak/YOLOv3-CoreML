@@ -1,11 +1,11 @@
 # YOLOv3 with Core ML
 
-This repo was forked and modified from [hollance/YOLO-CoreML-MPSNNGraph](https://github.com/hollance/YOLO-CoreML-MPSNNGraph). Some changes I made:
+This repo was forked and modified from  https://github.com/Ma-Dan/YOLOv3-CoreML
+The changes made:
 
-1. Add YOLOv3 model.
-2. Only keep Keras converter.
+1. Application for Static Images (instead of real-time video)
 
-
+--forked README--
 ## About YOLO object detection
 
 YOLO is an object detection network. It can detect multiple objects in an image and puts bounding boxes around these objects. [Read hollance's blog post about YOLO](http://machinethink.net/blog/object-detection-with-yolo/) to learn more about how it works.
