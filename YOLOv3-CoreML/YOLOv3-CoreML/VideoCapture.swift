@@ -3,19 +3,19 @@ import AVFoundation
 import CoreVideo
 
 public protocol VideoCaptureDelegate: class {
-  func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame: CVPixelBuffer?, timestamp: CMTime)
+  func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame: CVPixelBuffer?) //, timestamp: CMTime)
 }
 
 public class VideoCapture: NSObject {
   public var previewLayer: AVCaptureVideoPreviewLayer?
   public weak var delegate: VideoCaptureDelegate?
-  public var fps = 15
+//  public var fps = 15
 
   let captureSession = AVCaptureSession()
   let videoOutput = AVCaptureVideoDataOutput()
-  let queue = DispatchQueue(label: "net.machinethink.camera-queue")
+  let queue = DispatchQueue(label: "UMN_queue")
 
-  var lastTimestamp = CMTime()
+//  var lastTimestamp = CMTime()
 
   public func setUp(sessionPreset: AVCaptureSession.Preset = .medium,
                     completion: @escaping (Bool) -> Void) {
@@ -72,6 +72,9 @@ public class VideoCapture: NSObject {
   public func start() {
     if !captureSession.isRunning {
       captureSession.startRunning()
+//        delayWithSeconds(5){
+//          self.stop()
+//        }
     }
   }
 
@@ -87,16 +90,22 @@ extension VideoCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
     // Because lowering the capture device's FPS looks ugly in the preview,
     // we capture at full speed but only call the delegate at its desired
     // framerate.
-    let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-    let deltaTime = timestamp - lastTimestamp
-    if deltaTime >= CMTimeMake(1, Int32(fps)) {
-      lastTimestamp = timestamp
+//    let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+//    let deltaTime = timestamp - lastTimestamp
+//    if deltaTime >= CMTimeMake(1, Int32(fps)) {
+//      lastTimestamp = timestamp
       let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-      delegate?.videoCapture(self, didCaptureVideoFrame: imageBuffer, timestamp: timestamp)
-    }
+    delegate?.videoCapture(self, didCaptureVideoFrame: imageBuffer) //, timestamp: timestamp)
+//    }
   }
 
   public func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
     //print("dropped frame")
   }
+}
+
+func delayWithSeconds( _ seconds: Double, completion: @escaping () -> ()) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + seconds){
+        completion()
+    }
 }
