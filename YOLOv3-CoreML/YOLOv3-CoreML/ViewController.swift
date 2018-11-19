@@ -8,7 +8,9 @@ class ViewController: UIViewController {
   @IBOutlet weak var videoPreview: UIView!
 //  @IBOutlet weak var timeLabel: UILabel!
 //  @IBOutlet weak var debugImageView: UIImageView!
-  
+  // SGH -- flag to mimick semaphore
+    var onClickFlag = false
+    
   let yolo = YOLO()
 
   var videoCapture: VideoCapture!
@@ -41,7 +43,20 @@ class ViewController: UIViewController {
     super.didReceiveMemoryWarning()
     print(#function)
   }
-
+    
+  // SGH -- IAB FUNC
+    @IBAction func takePhoto(_ sender:Any){
+        self.onClickFlag = true
+    }
+// SGH -- IAB reset
+    @IBAction func resetYOLO(_ sender:Any){
+        self.videoCapture.start()
+        for i in 0..<boundingBoxes.count {
+            boundingBoxes[i].hide()
+        }
+        
+    }
+    
   // MARK: - Initialization
 
   func setUpBoundingBoxes() {
@@ -96,7 +111,7 @@ class ViewController: UIViewController {
           self.resizePreviewLayer()
         }
 
-        // Add the bounding box layers to the UI, on top of the video preview.
+//        // Add the bounding box layers to the UI, on top of the video preview.
         for box in self.boundingBoxes {
           box.addToLayer(self.videoPreview.layer)
         }
@@ -123,7 +138,6 @@ class ViewController: UIViewController {
   }
 
   // MARK: - Doing inference
-
   func predict(image: UIImage) {
     if let pixelBuffer = image.pixelBuffer(width: YOLO.inputWidth, height: YOLO.inputHeight) {
       predict(pixelBuffer: pixelBuffer)
@@ -151,7 +165,9 @@ class ViewController: UIViewController {
     // Resize the input to 416x416 and give it to our model.
     if let boundingBoxes = try? yolo.predict(image: resizedPixelBuffer) {
 //      let elapsed = CACurrentMediaTime() - startTime
+        
       showOnMainThread(boundingBoxes) //, elapsed)
+        
     }
   }
 
@@ -159,7 +175,7 @@ class ViewController: UIViewController {
 //    // Measure how long it takes to predict a single video frame. Note that
 //    // predict() can be called on the next frame while the previous one is
 //    // still being processed. Hence the need to queue up the start times.
-////    startTimes.append(CACurrentMediaTime())
+//    startTimes.append(CACurrentMediaTime())
 //
 //    // Vision will automatically resize the input image.
 //    let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer)
@@ -171,7 +187,7 @@ class ViewController: UIViewController {
 //       let features = observations.first?.featureValue.multiArrayValue {
 //
 //        let boundingBoxes = yolo.computeBoundingBoxes(features: [features, features, features])
-////      let elapsed = CACurrentMediaTime() - startTimes.remove(at: 0)
+//      let elapsed = CACurrentMediaTime() - startTimes.remove(at: 0)
 //      showOnMainThread(boundingBoxes) //, elapsed)
 //    }
 //  }
@@ -187,7 +203,7 @@ class ViewController: UIViewController {
 
 //      let fps = self.measureFPS()
 //      self.timeLabel.text = String(format: "Elapsed %.5f seconds - %.2f FPS", elapsed, fps)
-
+      
       self.semaphore.signal()
     }
   }
@@ -205,6 +221,11 @@ class ViewController: UIViewController {
 //  }
 
   func show(predictions: [YOLO.Prediction]) {
+    // --SGH close if there is detection shut the frame buffer
+    if predictions.count > 0 {
+        self.onClickFlag = false
+        self.videoCapture.stop()
+    }
     for i in 0..<boundingBoxes.count {
       if i < predictions.count {
         let prediction = predictions[i]
@@ -232,6 +253,7 @@ class ViewController: UIViewController {
         let label = String(format: "%@ %.1f", labels[prediction.classIndex], prediction.score * 100)
         let color = colors[prediction.classIndex]
         boundingBoxes[i].show(frame: rect, label: label, color: color)
+        
       } else {
         boundingBoxes[i].hide()
       }
@@ -243,17 +265,29 @@ extension ViewController: VideoCaptureDelegate {
   func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame pixelBuffer: CVPixelBuffer?) { //, timestamp: CMTime
     // For debugging.
     //predict(image: UIImage(named: "dog416")!); return
-
-    semaphore.wait()
-
+    
+    // SGH -- supplanting semaphaore with the camera capture button press.
+    //semaphore.wait()
+    
+    while(!self.onClickFlag){
+        delayWithSeconds(0.01){
+            
+        }
+    }
+    
+    
     if let pixelBuffer = pixelBuffer {
-      // For better throughput, perform the prediction on a background queue
+      // self.onClickFlag = false
+      // For better throyughput, perform the prediction on a background queue
       // instead of on the VideoCapture queue. We use the semaphore to block
       // the capture queue and drop frames when Core ML can't keep up.
       DispatchQueue.global().async {
         self.predict(pixelBuffer: pixelBuffer)
         //self.predictUsingVision(pixelBuffer: pixelBuffer)
       }
+        
     }
+    
+    
   }
 }

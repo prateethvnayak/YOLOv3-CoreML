@@ -71,7 +71,9 @@ public class VideoCapture: NSObject {
 
   public func start() {
     if !captureSession.isRunning {
-      captureSession.startRunning()
+        while(!captureSession.isRunning){
+            captureSession.startRunning()
+        }
 //        delayWithSeconds(5){
 //          self.stop()
 //        }
@@ -100,7 +102,7 @@ extension VideoCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
   }
 
   public func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-    //print("dropped frame")
+//    print("dropped frame")
   }
 }
 
