@@ -15,8 +15,6 @@ public class VideoCapture: NSObject {
   let videoOutput = AVCaptureVideoDataOutput()
   let queue = DispatchQueue(label: "UMN_queue")
 
-//  var lastTimestamp = CMTime()
-
   public func setUp(sessionPreset: AVCaptureSession.Preset = .medium,
                     completion: @escaping (Bool) -> Void) {
     queue.async {
@@ -74,9 +72,6 @@ public class VideoCapture: NSObject {
         while(!captureSession.isRunning){
             captureSession.startRunning()
         }
-//        delayWithSeconds(5){
-//          self.stop()
-//        }
     }
   }
 
@@ -90,12 +85,7 @@ public class VideoCapture: NSObject {
 extension VideoCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
   public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
     // Because lowering the capture device's FPS looks ugly in the preview,
-    // we capture at full speed but only call the delegate at its desired
-    // framerate.
-//    let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-//    let deltaTime = timestamp - lastTimestamp
-//    if deltaTime >= CMTimeMake(1, Int32(fps)) {
-//      lastTimestamp = timestamp
+    // we capture at full speed but only call the delegate at its desired framerate.
       let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
     delegate?.videoCapture(self, didCaptureVideoFrame: imageBuffer) //, timestamp: timestamp)
 //    }

@@ -8,14 +8,12 @@ class ViewController: UIViewController {
   @IBOutlet weak var videoPreview: UIView!
 //  @IBOutlet weak var timeLabel: UILabel!
 //  @IBOutlet weak var debugImageView: UIImageView!
-  // SGH -- flag to mimick semaphore
+  // PVN -- flag to mimick semaphore
     var onClickFlag = false
     
   let yolo = YOLO()
 
   var videoCapture: VideoCapture!
-//  var request: VNCoreMLRequest!
-//  var startTimes: [CFTimeInterval] = []
 
   var boundingBoxes = [BoundingBox]()
   var colors: [UIColor] = []
@@ -23,8 +21,6 @@ class ViewController: UIViewController {
   let ciContext = CIContext()
   var resizedPixelBuffer: CVPixelBuffer?
 
-//  var framesDone = 0
-//  var frameCapturingStartTime = CACurrentMediaTime()
   let semaphore = DispatchSemaphore(value: 2)
 
   override func viewDidLoad() {
@@ -33,7 +29,6 @@ class ViewController: UIViewController {
 
     setUpBoundingBoxes()
     setUpCoreImage()
-//    setUpVision()
     setUpCamera()
 
 //    frameCapturingStartTime = CACurrentMediaTime()
@@ -84,25 +79,9 @@ class ViewController: UIViewController {
       print("Error: could not create resized pixel buffer", status)
     }
   }
-
-//  func setUpVision() {
-//    guard let visionModel = try? VNCoreMLModel(for: yolo.model.model) else {
-//      print("Error: could not create Vision model")
-//      return
-//    }
-//
-//    request = VNCoreMLRequest(model: visionModel, completionHandler: visionRequestDidComplete)
-//
-//    // NOTE: If you choose another crop/scale option, then you must also
-//    // change how the BoundingBox objects get scaled when they are drawn.
-//    // Currently they assume the full input image is used.
-//    request.imageCropAndScaleOption = .scaleFill
-//  }
-
   func setUpCamera() {
     videoCapture = VideoCapture()
     videoCapture.delegate = self
-//    videoCapture.fps = 50
     videoCapture.setUp(sessionPreset: AVCaptureSession.Preset.vga640x480) { success in
       if success {
         // Add the video preview into the UI.
@@ -122,7 +101,7 @@ class ViewController: UIViewController {
     }
   }
 
-  // MARK: - UI stuff
+  //  UI stuff
 
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
@@ -164,35 +143,13 @@ class ViewController: UIViewController {
 
     // Resize the input to 416x416 and give it to our model.
     if let boundingBoxes = try? yolo.predict(image: resizedPixelBuffer) {
-//      let elapsed = CACurrentMediaTime() - startTime
-        
+
       showOnMainThread(boundingBoxes) //, elapsed)
         
     }
   }
 
-//  func predictUsingVision(pixelBuffer: CVPixelBuffer) {
-//    // Measure how long it takes to predict a single video frame. Note that
-//    // predict() can be called on the next frame while the previous one is
-//    // still being processed. Hence the need to queue up the start times.
-//    startTimes.append(CACurrentMediaTime())
-//
-//    // Vision will automatically resize the input image.
-//    let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer)
-//    try? handler.perform([request])
-//  }
-//
-//  func visionRequestDidComplete(request: VNRequest, error: Error?) {
-//    if let observations = request.results as? [VNCoreMLFeatureValueObservation],
-//       let features = observations.first?.featureValue.multiArrayValue {
-//
-//        let boundingBoxes = yolo.computeBoundingBoxes(features: [features, features, features])
-//      let elapsed = CACurrentMediaTime() - startTimes.remove(at: 0)
-//      showOnMainThread(boundingBoxes) //, elapsed)
-//    }
-//  }
-
-    func showOnMainThread(_ boundingBoxes: [YOLO.Prediction]) { //, _ elapsed: CFTimeInterval) {
+    func showOnMainThread(_ boundingBoxes: [YOLO.Prediction]) {
     DispatchQueue.main.async {
       // For debugging, to make sure the resized CVPixelBuffer is correct.
       //var debugImage: CGImage?
@@ -201,24 +158,9 @@ class ViewController: UIViewController {
 
       self.show(predictions: boundingBoxes)
 
-//      let fps = self.measureFPS()
-//      self.timeLabel.text = String(format: "Elapsed %.5f seconds - %.2f FPS", elapsed, fps)
-      
       self.semaphore.signal()
     }
   }
-
-//  func measureFPS() -> Double {
-//    // Measure how many frames were actually delivered per second.
-//    framesDone += 1
-//    let frameCapturingElapsed = CACurrentMediaTime() - frameCapturingStartTime
-//    let currentFPSDelivered = Double(framesDone) / frameCapturingElapsed
-//    if frameCapturingElapsed > 1 {
-//      framesDone = 0
-//      frameCapturingStartTime = CACurrentMediaTime()
-//    }
-//    return currentFPSDelivered
-//  }
 
   func show(predictions: [YOLO.Prediction]) {
     // --SGH close if there is detection shut the frame buffer
@@ -266,7 +208,7 @@ extension ViewController: VideoCaptureDelegate {
     // For debugging.
     //predict(image: UIImage(named: "dog416")!); return
     
-    // SGH -- supplanting semaphaore with the camera capture button press.
+    // PVN -- supplanting semaphaore with the camera capture button press.
     //semaphore.wait()
     
     while(!self.onClickFlag){
